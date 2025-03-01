@@ -17,7 +17,8 @@
     let concernsOnOrders = [];
     let filteredData = [];
     let searchQuery = "";
-
+    let showDeleteModal = false;
+    let rowToDelete = null;
     let UpdateData = {
         sra_engineer_name: "",
         supplier: "",
@@ -42,13 +43,13 @@
     };
 
     let isUpdating = false;
-    const fetchurl = "https://srcustomerpobackend.onrender.com/fetch";
-    const downloadexcelurl = "https://srcustomerpobackend.onrender.com/download";
-    const updateurl = "https://srcustomerpobackend.onrender.com/update";
+    const fetchurl = "http://localhost:8000/fetch";
+    const downloadexcelurl = "http://localhost:8000/download";
+    const updateurl = "http://localhost:8000/update";
 
     async function fetchDropdownData() {
         try {
-            const response = await fetch("https://srcustomerpobackend.onrender.com/dropdown");
+            const response = await fetch("http://localhost:8000/dropdown");
             if (response.ok) {
                 const dropdownData = await response.json();
                 customers = [...new Set(dropdownData.map(item => item.customer_name))];
@@ -171,6 +172,31 @@
         }
     }
 
+    function confirmDelete(row) {
+        rowToDelete = row;
+        showDeleteModal = true;
+    }
+
+    async function deleteCustomer() {
+        if (!rowToDelete) return;
+
+        try {
+            const response = await fetch(`http://localhost:8000/delete/${rowToDelete.id}`, {
+                method: "POST",
+            });
+
+            if (response.ok) {
+                console.log("Customer PO deleted successfully.");
+                showDeleteModal = false;
+                rowToDelete = null;
+                await fetchData(); 
+            } else {
+                console.error("Failed to delete customer PO:", response.statusText);
+            }
+        } catch (error) {
+            console.error("Error deleting customer PO:", error);
+        }
+    }
     function convertToIST(timestamp) {
         if (!timestamp) return "Invalid Date";
         const date = new Date(timestamp);
@@ -272,7 +298,8 @@ function formatDateToDayMonthYear(dateString) {
                             <th class="py-3 px-4">Reserved Stock Value</th>
                             <th class="py-3 px-4">Month of Delivery</th>
                             <th class="py-3 px-4">Category</th>
-                            <th class="py-3 px-4">Actions</th>
+                            <th class="py-3 px-4">Update</th>
+                            <th class="py-3 px-4">Delete</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -315,15 +342,23 @@ function formatDateToDayMonthYear(dateString) {
                         
                                 <td class="py-3 px-4 text-center">
                                     <!-- svelte-ignore a11y_consider_explicit_label -->
-                                    <button
+                                     <button
                                     class="text-xl font-medium rounded-full flex items-center justify-center text-center"
                                     on:click={() => openUpdateModal(row)}
-                                >
+                                            >
                                     <i class="fas fa-edit"></i>
-                                </button>
-                                       
-                                    </td>
-                                </tr>
+                                    </button>
+           
+        </td>
+    <td class="py-3 px-4 text-center">
+        
+        <button class="bg-red-500 text-white px-3 py-1 rounded ml-2" on:click={() => confirmDelete(row)}>Delete</button>
+    
+    </td>
+    
+                            
+                                 
+                                    </tr>
                             {/each}
                         {/if}
                     </tbody>
