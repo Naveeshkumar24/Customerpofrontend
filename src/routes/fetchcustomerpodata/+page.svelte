@@ -43,13 +43,13 @@
     };
 
     let isUpdating = false;
-    const fetchurl = "http://localhost:8000/fetch";
-    const downloadexcelurl = "http://localhost:8000/download";
-    const updateurl = "http://localhost:8000/update";
+    const fetchurl = "https://srcustomerpobackend.onrender.com/fetch";
+    const downloadexcelurl = "https://srcustomerpobackend.onrender.com/download";
+    const updateurl = "https://srcustomerpobackend.onrender.com/update";
 
     async function fetchDropdownData() {
         try {
-            const response = await fetch("http://localhost:8000/dropdown");
+            const response = await fetch("https://srcustomerpobackend.onrender.com/dropdown");
             if (response.ok) {
                 const dropdownData = await response.json();
                 customers = [...new Set(dropdownData.map(item => item.customer_name))];
@@ -181,7 +181,7 @@
         if (!rowToDelete) return;
 
         try {
-            const response = await fetch(`http://localhost:8000/delete/${rowToDelete.id}`, {
+            const response = await fetch(`https://srcustomerpobackend.onrender.com/${rowToDelete.id}`, {
                 method: "POST",
             });
 
@@ -385,7 +385,7 @@ function formatDateToDayMonthYear(dateString) {
 <div class="fixed inset-0 flex items-center justify-center z-50">
     <div class="w-full max-w-4xl mx-4 bg-white rounded-lg p-4 shadow-lg relative">
 
-        <form on:submit={updateCustomer} class="bg-white shadow-xl rounded-lg p-8 space-y-8">
+        <form on:submit|preventDefault={updateCustomer} class="bg-white shadow-xl rounded-lg p-8 space-y-8">
             <h1 class="text-center text-xl py-2 mb-6 font-semibold text-gray-900">Update Customer PO </h1>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
@@ -648,6 +648,19 @@ function formatDateToDayMonthYear(dateString) {
     </div>
 </div>
 
+{/if}
+{#if showDeleteModal}
+<div class="fixed inset-0 flex items-center justify-center  bg-black opacity-60 z-9">
+
+    <div class="bg-white p-6 rounded-lg shadow-xl">
+        <h2 class="text-lg font-semibold text-black">Confirm Deletion</h2>
+        <p class="text-black">Are you sure you want to delete this record?</p>
+        <div class="mt-4 flex justify-end">
+            <button class="bg-gray-400 text-white px-4 py-2 rounded mr-2" on:click={() => showDeleteModal = false}>Cancel</button>
+            <button class="bg-red-500 text-white px-4 py-2 rounded" on:click={deleteCustomer}>Delete</button>
+        </div>
+    </div>
+</div>
 {/if}
 </div>
 
